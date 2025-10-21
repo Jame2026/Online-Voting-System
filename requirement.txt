@@ -1,0 +1,14 @@
+
+# what did I use in the project.
+
+fastapi
+uvicorn
+mysql-connector-python
+jinja2
+python-multipart
+passlib[bcrypt]
+
+
+# How to run the project
+
+python -m uvicorn main:app --reload

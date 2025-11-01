@@ -1,0 +1,76 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 min-h-screen flex">
+
+  <!-- Sidebar -->
+  <aside class="w-64 bg-black text-white min-h-screen p-6 flex flex-col justify-between">
+    <div>
+      <div class="text-2xl font-bold mb-8">LOGO</div>
+      <nav class="space-y-2">
+        <a class="block py-2 px-3 rounded hover:bg-gray-800" href="/admin/dashboard">Dashboard</a>
+        <a class="block py-2 px-3 rounded hover:bg-gray-800" href="/admin/chart_data">Voting Data</a>
+        <a class="block py-2 px-3 rounded bg-blue-600" href="/admin/candidates">Candidates</a>
+        <a class="block py-2 px-3 rounded hover:bg-gray-800" href="/admin/users">Voter</a>
+        <a class="block py-2 px-3 rounded hover:bg-gray-800" href="#">Setting</a>
+      </nav>
+    </div>
+    <div>
+      <a href="/admin/logout" class="block bg-blue-600 text-center py-2 rounded">Logout</a>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="flex-1 p-8">
+    <header class="flex justify-between items-center mb-6">
+      <div class="flex items-center gap-4">
+        <input type="search" placeholder="Search..." class="rounded-xl px-4 py-2 border w-72" />
+      </div>
+      <div class="block items-center gap-3">
+        <img src="/static/images/admin.jpg" class="w-24 object-cover rounded-full" alt="admin" />
+        <div class="text-2xl font-medium">Lil Tjame</div>
+      </div>
+    </header>
+
+    <div class="container mx-auto border p-2 rounded-lg">
+    <h1 class="text-2xl font-bold mb-4 text-center">Candidates</h1>
+
+    <!-- ADD NEW CANDIDATE -->
+    <form method="post" action="/admin/candidates/create" enctype="multipart/form-data" class="bg-white p-4 rounded shadow mb-6 space-y-2">
+      <input type="text" name="name" placeholder="Candidate Name" class="w-full border px-3 py-2 rounded" required/>
+      <input type="file" name="photo_file" class="w-full"/>
+      <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">Add Candidate</button>
+    </form>
+
+    <!-- CANDIDATE LIST -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 ">
+      {% for c in candidates %}
+      <div class="bg-white p-4 rounded shadow flex items-center space-x-4">
+        {% if c.photo %}
+        <img src="/static/candidates/{{ c.photo }}" alt="{{ c.name }}" class="w-32 h-32 object-cover rounded-full">
+        {% endif %}
+        <div class="flex-1">
+          <p class="text-2xl font-semibold">{{ c.name }}</p>
+        </div>
+        <div class="flex gap-6">
+          <a href="/admin/candidates/{{ c.id }}/edit" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">Edit</a>
+          <form method="post" action="/admin/candidates/{{ c.id }}/delete">
+            <button type="submit" class=" bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition">Delete</button>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  </main>
+</body>
+</html>

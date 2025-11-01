@@ -1,14 +1,49 @@
 
 # what did I use in the project.
 
+
+FastAPI / Web Framework
+
+fastapi → main framework
+starlette → comes with FastAPI (for sessions, middleware)
+jinja2 → templates engine
+uvicorn → ASGI server (for uvicorn main:app --reload)
+
+
+Database mysql
+
+mysql-connector-python → for mysql.connector
+(or pymysql / mysqlclient if you prefer, but in your code it’s mysql.connector)
+
+
+Image / Face Recognition
+
+Pillow → from PIL import Image
+numpy → for image arrays and embeddings
+deepface → for face recognition
+
+
+Other Python built-ins
+These are standard libraries, no need to add to requirements.txt:
+
+io
+hashlib
+base64
+datetime (used if needed for timestamps)
+
+//In short
+
+passlib[bcrypt]
+python-multipart
 fastapi
 uvicorn
-mysql-connector-python
 jinja2
-python-multipart
-passlib[bcrypt]
+mysql-connector-python
+pillow
+numpy
+deepface
 
 
 # How to run the project
 
-python -m uvicorn main:app --reload
+python -m uvicorn app:app --reload

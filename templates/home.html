@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-voting</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+
+<body>
+
+    <section class="container min-h-screen bg-black-600 bg-center bg-cover px-28 pt-0 relative">
+        <nav class="flex items-center">
+            <img class="w-40  cursor-pointer" src="/static/images/real_logo.png">
+            <ul class="flex-1 text-center">
+                <li class="list-none inline-block px-5"><a class="no-underline px-2  hover:text-blue-500 transition-colors cursor-pointer
+                    text-xl font-semibold" href="#">Home</a></li>
+                <li class="list-none inline-block px-5"><a class="no-underline px-2  hover:text-blue-500 transition-colors cursor-pointer
+                    text-xl font-semibold" href="#Candidate">Candidate</a></li>
+                <li class="list-none inline-block px-5"><a class="no-underline px-2  hover:text-blue-500 transition-colors cursor-pointer
+                    text-xl font-semibold" href="#about">About Us</a></li>
+                <li class="list-none inline-block px-5"><a class="no-underline px-2  hover:text-blue-500 transition-colors cursor-pointer
+                    text-xl font-semibold" href="vote.html" id="votelink">Vote</a></li>
+            </ul>
+            <a href="/admin/login"><img class="w-32 cursor-pointer" src="/static/images/real_box.png"></a>
+        </nav>
+
+        <div class="mt-44 max-w-xl">
+            <h1 class="text-6xl font-bold leading-normal">Online Voting <br> <span class="font-light">System</span>
+            </h1>
+            <p class="text-xl font-sm">This system aims to replace traditional paper-based voting with a faster, more
+                efficient, and more secure digital process.</p>
+
+            <div class="mt-10">
+                <a href="/login"
+                    class="bg-yellow-300 rounded-3xl py-3 px-8 font-medium inline-block mr-4 
+                hover:bg-transparent hover:border-yellow-300 hover:text-black duration-300 hover:border-black border border-transparent">Login</a>
+                <a href="/verify_old_user"
+                    class="rounded-3xl py-2 px-2 font-medium inline-block hover:border-black hover:text-black duration-300 hover:border-black border border-transparent">Sign
+                    Up <span class="w-10 text-2xl inline-block rotate-10">&#8702;</span></a>
+            </div>
+        </div>
+        <img src="/static/images/candidates.png" class="w-full xl:w-1/2 xl:absolute bottom-0 right-20">
+    </section>
+    <section id="Candidate">
+        <h1 class="flex justify-center text-center text-5xl font-semibold">Candidates</h1><br><br>
+        <div class="grid grid-cols-3">
+            <div class="p-4 bg-cyan-50 m-4 rounded-3xl">
+                <div class="w-full mx-0 my-auto flex items-center justify-center relative top-auto">
+                    <div
+                        class="w-72 h-84 rounded-3xl mx-0 my-3 flex items-center justify-center relative shadow-2xl shadow-yellow-500">
+                        <img class="w-66 h-96 object-cover object-center rounded-full"
+                            src="/static/images/candidate4.png">
+                    </div>
+                </div><br>
+                <h2 class="flex justify-center text-center text-3xl font-semibold"><strong>Chem Khoeurn</strong></h2>
+                <p class="text-md">I stand for transparency, equality, and progress. My goal is to create a community
+                    where every citizen feels heard, supported, and empowered to achieve their best. With teamwork,
+                    innovation, and compassion, I aim to lead in a way that inspires trust and unity.</p>
+                <h3 class="text-xl font-semibold">My Abilities and Strengths</h3>
+                <ul>
+                    <li class="text-md"><strong>Strong Leadership:</strong> I take initiative, make fair decisions, and
+                        bring people together to solve problems.</li>
+                    <li class="text-md"><strong>Good Communication:</strong> I listen actively and speak clearly to
+                        ensure everyone’s opinion is valued.</li>
+                    <li class="text-md"><strong>Commitment to Service:</strong> I always put the community’s needs
+                        before my own.</li>
+                    <li class="text-md"><strong>Problem Solver:</strong> I approach challenges with practical and
+                        creative solutions.</li>
+                    <li class="text-md"><strong>Integrity and Responsibility:</strong> I believe in doing what is right
+                        — even when no one is watching.</li>
+                </ul>
+                <h3 class="text-xl font-semibold">My Vision</h3>
+                <p class="text-md">To build a brighter, stronger, and more connected community — where opportunities are
+                    equal, development is sustainable, and every citizen plays a part in shaping our future.Together, we
+                    can make a difference.
+                    <br>
+                    <strong>Vote for Chem Khoeurn — your voice, your power, your future.</strong>
+                </p>
+            </div>
+            <div class="p-4 bg-cyan-50 m-4 rounded-3xl">
+                <div class="w-full mx-0 my-auto flex items-center justify-center relative top-auto">
+                    <div
+                        class="w-72 h-84 rounded-3xl mx-0 my-3 flex items-center justify-center relative shadow-2xl shadow-red-500">
+                        <img class="w-66 h-96 object-cover object-center rounded-full"
+                            src="/static/images/candidate5.png">
+                    </div>
+                </div><br>
+                <h2 class="flex justify-center text-center text-3xl font-semibold"><strong>Sothin Ke</strong></h2>
+                <p class="text-md">I believe leadership is not about power — it’s about service. It’s about listening,
+                    caring, and making decisions that improve people’s lives. Every person’s voice matters, and I want
+                    to be the one who helps turn those voices into real action.</p>
+                <h3 class="text-xl font-semibold">My Abilities and Strengths</h3>
+                <ul>
+                    <li class="text-md"><strong>Strong Leadership:</strong> I take initiative, make fair decisions, and
+                        bring people together to solve problems.</li>
+                    <li class="text-md"><strong>Good Communication:</strong> I listen actively and speak clearly to
+                        ensure everyone’s opinion is valued.</li>
+                    <li class="text-md"><strong>Commitment to Service:</strong> I always put the community’s needs
+                        before my own.</li>
+                    <li class="text-md"><strong>Problem Solver:</strong> I approach challenges with practical and
+                        creative solutions.</li>
+                    <li class="text-md"><strong>Integrity and Responsibility:</strong> I believe in doing what is right
+                        — even when no one is watching.</li>
+                </ul>
+                <h3 class="text-xl font-semibold">My Vision</h3>
+                <p class="text-md">To build a fair, strong, and caring community — where everyone has a chance to grow,
+                    to learn, and to live in harmony. Together, we can create a future full of opportunity, equality,
+                    and hope.
+                    <br>
+                    <strong>Let’s move forward — Vote for Sothin Ke, a voice for the people and a heart for
+                        progress.</strong>
+                </p>
+            </div>
+            <div class="p-4 bg-cyan-50 m-4 rounded-3xl">
+                <div class="w-full mx-0 my-auto flex items-center justify-center relative top-auto">
+                    <div
+                        class="w-72 h-84 rounded-3xl mx-0 my-3 flex items-center justify-center relative shadow-2xl shadow-blue-500">
+                        <img class="w-66 h-96 object-cover object-center rounded-full"
+                            src="/static/images/candidate3.png">
+                    </div>
+                </div><br>
+                <h2 class="flex justify-center text-center text-3xl font-semibold"><strong>Dane Miok</strong></h2>
+                <p class="text-md">Leadership, to me, is not about being above others — it’s about standing beside them,
+                    understanding their needs, and working together to create a better tomorrow. I’m here to represent
+                    fairness, dedication, and hope for a stronger future.</p>
+                <h3 class="text-xl font-semibold">My Abilities and Strengths</h3>
+                <ul>
+                    <li class="text-md"><strong>Strong Leadership:</strong> I take initiative, make fair decisions, and
+                        bring people together to solve problems.</li>
+                    <li class="text-md"><strong>Good Communication:</strong> I listen actively and speak clearly to
+                        ensure everyone’s opinion is valued.</li>
+                    <li class="text-md"><strong>Commitment to Service:</strong> I always put the community’s needs
+                        before my own.</li>
+                    <li class="text-md"><strong>Problem Solver:</strong> I approach challenges with practical and
+                        creative solutions.</li>
+                    <li class="text-md"><strong>Integrity and Responsibility:</strong> I believe in doing what is right
+                        — even when no one is watching.</li>
+                </ul>
+                <h3 class="text-xl font-semibold">My Vision</h3>
+                <p class="text-md">To create a community where every person feels valued, respected, and empowered —
+                    where progress is shared by all, and no one is left behind. Together, we can bring real change,
+                    build trust, and shape a brighter future for everyone.
+                    <br>
+                    <strong>Let’s rise together — Vote for Dane Miok, a leader with vision, courage, and a heart for the
+                        people.</strong>
+                </p>
+            </div>
+        </div>
+    </section><br><br>
+    <section id="about">
+        <h1 class="flex justify-center text-center text-5xl font-semibold">About Us</h1><br><br>
+        <div class="grid grid-cols-2">
+            <div class="p-4 bg-cyan-50 m-4 rounded-xl">
+                <div class="w-full mx-0 my-auto flex items-center justify-center relative top-auto">
+                    <img class="w-96 object-cover object-center rounded-full shadow-yellow-500"
+                        src="/static/images/about.png">
+                </div>
+            </div>
+            <div class="p-4 bg-cyan-50 m-4 rounded-xl">
+                <div class="w-full mx-0 my-auto  items-center justify-center relative top-auto">
+                    <p class="text-xl font-semibold">Justice generally refers to fairness and moral rightness in
+                        society. Its aims (or goals) are the purposes that justice seeks to achieve. Here are the main
+                        aims:</p><br>
+                    <p><strong>Fairness for All Candidates:</strong></p>
+                    <ul>
+                        <li>-> Ensure every candidate has an equal opportunity to be seen and voted for.</li>
+                        <li>-> Prevent bias or favoritism in the voting process.</li>
+                    </ul>
+                    <p><strong>Transparency and Trust:</strong></p>
+                    <ul>
+                        <li>-> Make the voting process clear and verifiable for citizens.</li>
+                        <li>-> Provide tools to monitor votes and results securely.</li>
+                    </ul>
+                    <p><strong>Accessibility and Convenience:</strong></p>
+                    <ul>
+                        <li>-> Allow citizens to vote easily and safely from anywhere.</li>
+                        <li>-> Ensure the system is simple and user-friendly for everyone.</li>
+                    </ul>
+                    <p><strong>Security and Accuracy:</strong></p>
+                    <ul>
+                        <li>-> Protect voter data and prevent fraud or tampering.</li>
+                        <li>-> Guarantee that every vote counts correctly.</li>
+                    </ul>
+                    <p><strong>Promoting Civic Engagement:</strong></p>
+                    <ul>
+                        <li>-> Encourage citizens to participate actively in the democratic process.</li>
+                        <li>-> Build trust in the election system through openness and fairness.</li>
+                    </ul>
+                </div>
+            </div>
+            <div>
+
+            </div>
+        </div>
+    </section>
+    <footer class="flex justify-between p-14">
+        <div class="">
+            <div class="flex">
+                <img class="w-24" src="/static/images/real_logo.png">
+                <h1 class="text-2xl font-bold mt-8">E-voting</h1>
+            </div>
+            <h4>Contact</h4>
+            <p><strong>Address: </strong>jame.khouen <br> @student.passerellesnumeriques.org</p>
+            <p><strong>Phone:</strong>+08 8244 6786 <br> (+09) 7523 9318</p>
+            <p><strong>Hours:</strong> 7:00 - 5:00, Mon- Sun</p>
+        </div>
+        <div class="grid duration-columns">
+            <h4 class="text-2xl font-bold mt-8">About</h4>
+            <a href="#">About Us</a>
+            <a href="#">Fair</a>
+            <a href="#">None Condemn</a>
+            <a href="#">Terms & conditions</a>
+            <a href="#">Contact Us</a>
+        </div>
+        <div class="grid duration-columns">
+            <h4 class="text-2xl font-bold mt-8">My Account</h4>
+            <a href="#">Sign in</a>
+            <a href="#">View Cart</a>
+            <a href="#">My Telegram</a>
+            <a href="#">Trock My Order</a>
+            <a href="#">Help</a>
+        </div>
+    </footer>
+    <footer class="flex justify-center items-center p-4">
+        <p>Create and Building by Chem Khoeurn.</p>
+    </footer>
+
+
+    <script>
+        // Check if user is enrolled before allowing voting
+        const voteLink = document.getElementById('votelink');
+        voteLink.addEventListener('click', (e) => {
+            const isEnrolled = localStorage.getItem('userEnrolled'); // flag set during enroll/login
+            if (!isEnrolled) {
+                e.preventDefault(); // stop navigation
+                alert('Please enroll or login first to vote.');
+            }
+        });
+
+        // Optional: redirect to homepage after enroll/login
+        // Example for enroll page JS: localStorage.setItem('userEnrolled', 'true');
+    </script>
+
+</body>
+
+</html>

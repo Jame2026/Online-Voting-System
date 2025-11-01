@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body class="bg-gray-100 min-h-screen flex">
+
+  <!-- Sidebar -->
+  <aside class="w-64 bg-black text-white min-h-screen p-6 flex flex-col justify-between">
+    <div>
+      <div class="text-2xl font-bold mb-8">LOGO</div>
+      <nav class="space-y-2">
+        <a class="block py-2 px-3 rounded bg-blue-600" href="#">Dashboard</a>
+        <a class="block py-2 px-3 rounded hover:bg-gray-800" href="/admin/chart_data">Voting Data</a>
+        <a class="block py-2 px-3 rounded hover:bg-gray-800" href="/admin/candidates">Candidates</a>
+        <a class="block py-2 px-3 rounded hover:bg-gray-800" href="/admin/users">Voter</a>
+        <a class="block py-2 px-3 rounded hover:bg-gray-800" href="#">Setting</a>
+      </nav>
+    </div>
+    <div>
+      <a href="/admin/logout" class="block bg-blue-600 text-center py-2 rounded">Logout</a>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="flex-1 p-8">
+    <header class="flex justify-between items-center mb-6">
+      <div class="flex items-center gap-4">
+        <input type="search" placeholder="Search..." class="rounded-xl px-4 py-2 border w-72" />
+      </div>
+      <div class="block items-center gap-3">
+        <img src="/static/images/admin.jpg" class="w-24 object-cover rounded-full" alt="admin" />
+        <div class="text-2xl font-medium">Lil Tjame</div>
+      </div>
+    </header>
+
+
+
+
+    <!-- Stats -->
+    <div class="grid grid-cols-3 gap-6 mb-8">
+      <div class="bg-white p-6 rounded-xl shadow">
+        <div class="text-gray-500">Total Voters</div>
+        <div class="text-2xl font-bold mt-2">{{ total_voters }}</div>
+      </div>
+      <div class="bg-white p-6 rounded-xl shadow">
+        <div class="text-gray-500">Total Candidates</div>
+        <div class="text-2xl font-bold mt-2">{{ total_candidates }}</div>
+      </div>
+      <div class="bg-white p-6 rounded-xl shadow">
+        <div class="text-gray-500">Votes Cast</div>
+        <div class="text-2xl font-bold mt-2">{{ total_votes }}</div>
+      </div>
+    </div>
+
+
+    <!-- Candidate list -->
+    <div class="bg-white p-6 rounded-xl shadow">
+      <h3 class="text-3xl font-semibold mb-4">All Candidates</h3>
+      <div class="grid grid-cols-3 gap-4">
+        {% for c in candidates %}
+        <div class="px-16">
+           <img src="/static/candidates/{{ c.photo }}" alt="{{ c.name }}" class="w-72 h-72 object-cover rounded">
+          <div class="text-2xl font-semibold">{{ c.name }}</div>
+          <div class="text-sm text-gray-600">Votes: {{ c.votes }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Chart data injected by server (chart_data is JSON string)
+    // Candidate names and votes
+const labels = chartData.map(x => x.name);
+const votes = chartData.map(x => x.votes);
+
+// Assign a distinct color for each candidate
+const backgroundColors = [
+  '#0ea5e9', '#f97316', '#16a34a', '#e11d48', '#8b5cf6', '#facc15'
+];
+
+// Calculate total votes for percentages
+const totalVotes = votes.reduce((sum, v) => sum + v, 0);
+
+// Bar chart with colors and tooltip showing percent
+const ctx = document.getElementById('candidateChart').getContext('2d');
+new Chart(ctx, {
+  type: 'bar',
+  data: {
+    labels: labels,
+    datasets: [{
+      label: 'Votes',
+      data: votes,
+      backgroundColor: labels.map((_, i) => backgroundColors[i % backgroundColors.length]),
+      borderColor: labels.map((_, i) => backgroundColors[i % backgroundColors.length]),
+      borderWidth: 1
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      tooltip: {
+        callbacks: {
+          label: function(context) {
+            const votesCount = context.raw;
+            const percent = ((votesCount / totalVotes) * 100).toFixed(1);
+            return `${votesCount} votes (${percent}%)`;
+          }
+        }
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          precision: 0
+        }
+      }
+    }
+  }
+});
+
+  </script>
+</body>
+
+</html>

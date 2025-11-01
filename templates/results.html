@@ -2,24 +2,21 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Results</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Results - Online Voting System</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen">
-    <div class="bg-white p-8 rounded shadow-md w-96">
-        <h2 class="text-2xl font-bold mb-6 text-center">Election Results</h2>
-        <ul>
-            {% for candidate in results %}
-            <li class="mb-2 flex justify-between">
-                <span>{{ candidate.name }}</span>
-                <span class="font-bold">{{ candidate.votes }}</span>
-            </li>
-            {% endfor %}
-        </ul>
-        <div class="mt-6 text-center">
-            <a href="/vote" class="text-blue-500 hover:underline">Back to Voting</a> |
-            <a href="/logout" class="text-red-500 hover:underline">Logout</a>
+
+    <div class="bg-white p-8 rounded-xl shadow-md w-full max-w-lg">
+        <h1 class="text-2xl font-bold mb-6 text-center">Thank You</h1>
+
+        <div class="w-full border-collapse text-center">
+            <span class="text-6xl">✔️</span>
+            <h1 class="text-xl font-medium text-blue-500">Your respone was submitted</h1>
+            <p>--------- important thing you can do next ---------</p>
         </div>
+        <a href="/" class="block text-center text-blue-500 bg-red-500 text-white py-2 ml-36 rounded w-40 mt-4 transition duration-200 ease-in hover:bg-red-600">Back</a>
     </div>
 </body>
 </html>

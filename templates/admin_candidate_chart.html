@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Live Vote Dashboard</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+
+  <style>
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+      padding: 20px;
+      max-width: 520px;
+      margin: 30px auto;
+    }
+    #chartWrapper { width: 100%; max-width: 480px; margin: 0 auto; }
+    #chartCanvas { display: block; width:100%; height:auto; }
+    #voteCircles {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 30px;
+    }
+    .vote-circle {
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      text-align: center;
+      padding: 5px;
+      font-size: 14px;
+      line-height: 1.2;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center py-10">
+
+  <div class="card">
+    <div class="text-center mb-4">
+      <h1 class="text-xl font-semibold">Vote Comparison</h1>
+      <p class="text-sm text-gray-600">Live votes from database</p>
+    </div>
+
+    <div id="chartWrapper" style="height:420px;">
+      <canvas id="chartCanvas"></canvas>
+    </div>
+
+    <div class="mt-4 flex items-center justify-between">
+      <div class="text-sm text-gray-600">Total votes: <strong id="totalVotes">0</strong></div>
+      <div>
+        <button id="downloadBtn" class="bg-blue-600 text-white px-3 py-1 rounded">Download PNG</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="voteCircles"></div>
+
+<script>
+Chart.register(ChartDataLabels);
+
+// Fetch votes from backend
+async function fetchChartData(){
+  const res = await fetch('/admin/chart_data', { credentials: 'same-origin' });
+  if (!res.ok) throw new Error('Failed to load chart data: ' + res.status);
+  return res.json();
+}
+
+// Render circles dynamically
+function renderCircles(data) {
+    const circleContainer = document.getElementById('voteCircles');
+    circleContainer.innerHTML = '';
+
+    const labels = data.labels;
+    const values = data.data;
+    const colors = labels.map((_,i) => `hsl(${(i*52) % 360}, 78%, ${i%2 ? 60 : 52}%)`);
+    const maxVotes = Math.max(...values, 1);
+
+    labels.forEach((label, i) => {
+        const circle = document.createElement('div');
+        const size = 50 + (values[i]/maxVotes)*150; // scale size
+        circle.className = 'vote-circle';
+        circle.style.width = circle.style.height = size + 'px';
+        circle.style.backgroundColor = colors[i];
+        circle.textContent = `${label}\n${values[i]}`;
+        circleContainer.appendChild(circle);
+    });
+}
+
+// Initialize chart first
+let chart;
+(async function init() {
+    try {
+        const payload = await fetchChartData();
+        if (!payload || payload.ok === false) throw new Error('No data or ok=false');
+
+        const labels = payload.labels;
+        const values = payload.data;
+        const totalVotes = values.reduce((s,v) => s+v,0);
+        document.getElementById('totalVotes').textContent = totalVotes.toLocaleString();
+
+        const colors = labels.map((_,i) => `hsl(${(i*52) % 360}, 78%, ${i%2 ? 60 : 52}%)`);
+        const borderColors = labels.map((_,i) => `hsl(${(i*52) % 360}, 78%, ${i%2 ? 40 : 38}%)`);
+
+        const ctx = document.getElementById('chartCanvas').getContext('2d');
+        chart = new Chart(ctx, {
+            type: 'doughnut',
+            data: { labels, datasets:[{ data: values, backgroundColor: colors, borderColor: borderColors, borderWidth: 2, spacing: 4, borderRadius: 10 }] },
+            options: {
+                maintainAspectRatio: true,
+                aspectRatio: 1,
+                cutout: '38%',
+                plugins: {
+                    legend: { display:false },
+                    tooltip: { callbacks: { label: ctx => {
+                        const v = ctx.parsed || 0;
+                        const pct = totalVotes ? ((v/totalVotes)*100).toFixed(2) : '0.00';
+                        return `${ctx.label}: ${v} votes (${pct}%)`;
+                    }}},
+                    datalabels: {
+                        color: '#0b6623',
+                        font: { weight: '700', size: 14 },
+                        formatter: (value, ctx) => {
+                            const label = ctx.chart.data.labels[ctx.dataIndex] || '';
+                            const pct = totalVotes ? ((value/totalVotes)*100).toFixed(0) : '0';
+                            return label + '\n' + pct + '%';
+                        },
+                        textAlign: 'center', anchor:'center', align:'center', clamp:true
+                    }
+                }
+            }
+        });
+
+        renderCircles(payload);
+
+        document.getElementById('downloadBtn').addEventListener('click', () => {
+            const a = document.createElement('a'); a.href = chart.toBase64Image(); a.download='votes_chart.png'; a.click();
+        });
+
+    } catch(err) {
+        console.error('Error initializing chart:', err);
+    }
+})();
+
+// Update chart and circles periodically
+async function updateData() {
+    try {
+        const payload = await fetchChartData();
+        if (!payload || payload.ok === false) return;
+
+        const values = payload.data;
+        const totalVotes = values.reduce((s,v)=>s+v,0);
+        document.getElementById('totalVotes').textContent = totalVotes.toLocaleString();
+
+        // Update chart
+        chart.data.labels = payload.labels;
+        chart.data.datasets[0].data = values;
+        chart.update();
+
+        // Update circles
+        renderCircles(payload);
+
+    } catch(err) {
+        console.error('Error updating data:', err);
+    }
+}
+
+// Refresh every 5 seconds
+setInterval(updateData, 5000);
+</script>
+</body>
+</html>

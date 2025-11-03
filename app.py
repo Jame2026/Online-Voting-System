@@ -4,12 +4,9 @@ import io
 import uuid
 import base64
 import hashlib
-import json
 import cv2
 import numpy as np
 from PIL import Image
-from typing import Optional, Dict, Any
-from mysql.connector import Error
 
 from fastapi import FastAPI, Request, Form, UploadFile, File, Depends, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse

@@ -8,6 +8,8 @@ import json
 import cv2
 import numpy as np
 from PIL import Image
+from typing import Optional, Dict, Any
+from mysql.connector import Error
 
 from fastapi import FastAPI, Request, Form, UploadFile, File, Depends, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
@@ -513,38 +515,27 @@ def delete_user(user_id: int):
 
 
 
+def require_admin(request: Request):
+    try:
+        sess = request.session
+    except:
+        sess = {}
+    if not sess.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Admin required")
 
 @app.get("/admin/chart_data")
 def admin_chart_data(request: Request):
-    """
-    Returns JSON:
-      {
-        "ok": True,
-        "total_candidates": int,
-        "total_votes": int,
-        "labels": [...],
-        "data": [...],
-        "ids": [...],
-        "rows": [{id,name,votes}, ...]
-      }
-    """
-    # optionally require admin session if you use require_admin
-    try:
-        # If you have a require_admin helper, uncomment next line:
-        # require_admin(request)
-        pass
-    except Exception:
-        # if require_admin raises RedirectResponse, just continue to let the caller see JSON
-        pass
+    # require_admin(request)  # uncomment if you need admin auth
 
     conn = None
+    cursor = None
     try:
-        conn = get_db_connection()
+        conn = get_db_connection()  # <-- use your db.py function
         cursor = conn.cursor(dictionary=True)
 
-        # Query: return every candidate and a count of votes (0 if none)
+        # Query candidates & votes
         cursor.execute("""
-            SELECT c.id, c.name, COALESCE(v.votes, 0) AS votes
+            SELECT c.id, c.name, COALESCE(v.votes,0) AS votes
             FROM candidates c
             LEFT JOIN (
                 SELECT candidate_id, COUNT(*) AS votes
@@ -553,21 +544,20 @@ def admin_chart_data(request: Request):
             ) v ON c.id = v.candidate_id
             ORDER BY votes DESC, c.name ASC
         """)
-        rows = cursor.fetchall()
+        rows = cursor.fetchall() or []
 
-        # total counts for convenience/debug
+        # Totals
         cursor.execute("SELECT COUNT(*) AS total_candidates FROM candidates")
-        total_candidates = int(cursor.fetchone()['total_candidates'] or 0)
+        total_candidates = int(cursor.fetchone().get('total_candidates',0) or 0)
 
         cursor.execute("SELECT COUNT(*) AS total_votes FROM votes")
-        total_votes = int(cursor.fetchone()['total_votes'] or 0)
+        total_votes = int(cursor.fetchone().get('total_votes',0) or 0)
 
-        # prepare arrays (ensure ints)
         labels = [r['name'] for r in rows]
         data = [int(r['votes'] or 0) for r in rows]
         ids = [int(r['id']) for r in rows]
 
-        return {
+        return JSONResponse({
             "ok": True,
             "total_candidates": total_candidates,
             "total_votes": total_votes,
@@ -575,24 +565,18 @@ def admin_chart_data(request: Request):
             "data": data,
             "ids": ids,
             "rows": rows
-        }
+        })
+
     except Exception as e:
-        # Helpful debug output for dev. Remove/obfuscate in production.
-        return {"ok": False, "error": str(e)}
+        return JSONResponse({"ok": False, "error": str(e)}, status_code=500)
+
     finally:
-        try:
-            cursor.close()
-        except:
-            pass
+        if cursor:
+            try: cursor.close()
+            except: pass
         if conn:
-            conn.close()
-
-
-
-
-@app.get("/admin/candidate_chart", response_class=HTMLResponse)
-def admin_candidate_chart(request: Request):
-    # Show admin page (template will fetch /admin/chart_data)
-    # require_admin check here if desired
-
+            try: conn.close()
+            except: pass
+@app.get("/dashboard", response_class=HTMLResponse)
+def dashboard(request: Request):
     return templates.TemplateResponse("admin_candidate_chart.html", {"request": request})

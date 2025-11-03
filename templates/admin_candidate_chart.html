@@ -1,179 +1,370 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Live Vote Dashboard</title>
-
+  <title>Admin Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 
+  <!-- jQuery + DataTables -->
+  <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+  <!-- Chart.js + datalabels -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script
+    src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
   <style>
     .card {
       background: #fff;
       border-radius: 12px;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
       padding: 20px;
-      max-width: 520px;
-      margin: 30px auto;
+      margin: 16px;
     }
-    #chartWrapper { width: 100%; max-width: 480px; margin: 0 auto; }
-    #chartCanvas { display: block; width:100%; height:auto; }
+
     #voteCircles {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 15px;
-      margin-top: 30px;
+      gap: 12px;
+      margin-top: 18px;
     }
+
     .vote-circle {
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       color: white;
-      font-weight: bold;
+      font-weight: 700;
       text-align: center;
-      padding: 5px;
-      font-size: 14px;
-      line-height: 1.2;
+      padding: 6px;
+      font-size: 13px;
+      line-height: 1.05;
+      white-space: pre-line;
+    }
+
+    canvas {
+      max-width: 100%;
     }
   </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col items-center py-10">
 
-  <div class="card">
-    <div class="text-center mb-4">
-      <h1 class="text-xl font-semibold">Vote Comparison</h1>
-      <p class="text-sm text-gray-600">Live votes from database</p>
+<body class="bg-gray-100 min-h-screen flex">
+
+  <!-- Sidebar -->
+  <aside class="w-64 bg-black text-white min-h-screen p-6 flex flex-col justify-between">
+    <div>
+      <div class="text-2xl font-bold mb-8">LOGO</div>
+      <nav class="space-y-2">
+        <a class="block py-2 px-3 rounded hover:bg-gray-800" href="/admin/dashboard">Dashboard</a>
+        <a class="block py-2 px-3 rounded bg-blue-600" href="/dashboard">Voting Data</a>
+        <a class="block py-2 px-3 rounded hover:bg-gray-800" href="/admin/candidates">Candidates</a>
+        <a class="block py-2 px-3 rounded hover:bg-gray-800" href="/admin/users">Voter</a>
+        <a class="block py-2 px-3 rounded hover:bg-gray-800" href="#">Setting</a>
+      </nav>
     </div>
-
-    <div id="chartWrapper" style="height:420px;">
-      <canvas id="chartCanvas"></canvas>
+    <div>
+      <a href="/admin/logout" class="block bg-blue-600 text-center py-2 rounded">Logout</a>
     </div>
+  </aside>
 
-    <div class="mt-4 flex items-center justify-between">
-      <div class="text-sm text-gray-600">Total votes: <strong id="totalVotes">0</strong></div>
-      <div>
-        <button id="downloadBtn" class="bg-blue-600 text-white px-3 py-1 rounded">Download PNG</button>
+  <!-- Main -->
+  <main class="flex-1 p-8">
+    <header class="flex justify-between items-center mb-6">
+      <div class="flex items-center gap-4">
+        <input type="search" placeholder="Search..." class="rounded-xl px-4 py-2 border w-72" />
       </div>
-    </div>
-  </div>
+      <div class="block items-center gap-3">
+        <img src="/static/images/admin.jpg" class="w-24 object-cover rounded-full" alt="admin" />
+        <div class="text-2xl font-medium">Lil Tjame</div>
+      </div>
+    </header>
+    <div class="w-full mx-auto py-2">
 
-  <div id="voteCircles"></div>
+      <!-- Top: Doughnut + Controls -->
+      <div class="card">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h1 class="text-xl font-semibold">Live Voting Data</h1>
+            <p class="text-sm text-gray-600">Auto-refreshes every 5 seconds
+            </p>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="text-sm text-gray-600">Total votes: <strong id="totalVotes">0</strong></div>
+            <button id="downloadBtn" class="bg-blue-600 text-white px-3 py-1 rounded">Download PNG</button>
+          </div>
+        </div>
 
-<script>
-Chart.register(ChartDataLabels);
+        <div class="flex flex-col md:flex-row md:items-start md:gap-6">
+          <!-- Doughnut -->
+          <div class="w-full md:w-1/3 flex flex-col items-center">
+            <div id="chartWrapper" class="w-full max-w-xs">
+              <canvas id="doughnutChart"></canvas>
+            </div>
+          </div>
 
-// Fetch votes from backend
-async function fetchChartData(){
-  const res = await fetch('/admin/chart_data', { credentials: 'same-origin' });
-  if (!res.ok) throw new Error('Failed to load chart data: ' + res.status);
-  return res.json();
-}
+          <!-- Bar + Pie -->
+          <div class="w-full md:w-2/3 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="p-2">
+              <h3 class="text-sm font-medium text-center mb-2">Bar Chart</h3>
+              <div class="card p-4">
+                <canvas id="barChart"></canvas>
+              </div>
+            </div>
 
-// Render circles dynamically
-function renderCircles(data) {
-    const circleContainer = document.getElementById('voteCircles');
-    circleContainer.innerHTML = '';
+            <div class="p-2">
+              <h3 class="text-sm font-medium text-center mb-2">Pie Chart</h3>
+              <div class="card p-4">
+                <canvas id="pieChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
 
-    const labels = data.labels;
-    const values = data.data;
-    const colors = labels.map((_,i) => `hsl(${(i*52) % 360}, 78%, ${i%2 ? 60 : 52}%)`);
-    const maxVotes = Math.max(...values, 1);
+        <!-- Circles -->
+        <div id="voteCircles" class="mt-2"></div>
+      </div>
 
-    labels.forEach((label, i) => {
+      <!-- Table -->
+      <div class="card mt-4">
+        <h2 class="text-lg font-semibold mb-3">Votes Table</h2>
+        <div class="overflow-x-auto">
+          <table id="productsTable" class="display stripe hover" style="width:100%">
+            <thead>
+              <tr>
+                <th>Candidate</th>
+                <th>Votes</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody">
+              <!-- populated by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+  </main>
+  <script>
+    // Register plugin
+    Chart.register(ChartDataLabels);
+
+    // single endpoint used for all charts
+    const ENDPOINT = '/admin/chart_data'; // must return { labels: [...], data: [...] }
+
+    // Chart references
+    let doughnutChart = null;
+    let barChart = null;
+    let pieChart = null;
+    let dataTable = null;
+
+    // Fetch data helper
+    async function fetchChartData() {
+      const res = await fetch(ENDPOINT, { credentials: 'same-origin' });
+      if (!res.ok) throw new Error('Failed to load chart data: ' + res.status);
+      return res.json();
+    }
+
+    // Create color arrays using HSL to guarantee distinct colors
+    // Custom fixed colors for each candidate
+    function genColors(n) {
+      const fixedColors = [
+        '#49affc', // Dane - light blue
+        '#fce832', // Thin - light red (pinkish)
+        '#fc3d3d'  // Jame - light yellow
+      ];
+      return fixedColors.slice(0, n);
+    }
+
+    function genBorderColors(n) {
+      const fixedBorders = [
+        '#6CA6CD', // Dane - darker blue
+        '#FFD700', // Thin - darker red
+        '#FF6F91'  // Jame - golden border
+      ];
+      return fixedBorders.slice(0, n);
+    }
+
+
+    // Render circles
+    function renderCircles(labels, values) {
+      const circleContainer = document.getElementById('voteCircles');
+      circleContainer.innerHTML = '';
+      const maxVotes = Math.max(...values, 1);
+      const colors = genColors(labels.length);
+
+      labels.forEach((label, i) => {
         const circle = document.createElement('div');
-        const size = 50 + (values[i]/maxVotes)*150; // scale size
+        const size = 48 + (values[i] / maxVotes) * 160; // scale
         circle.className = 'vote-circle';
-        circle.style.width = circle.style.height = size + 'px';
+        circle.style.width = circle.style.height = Math.round(size) + 'px';
         circle.style.backgroundColor = colors[i];
+        // show label then value on new line
         circle.textContent = `${label}\n${values[i]}`;
+        circle.title = `${label}: ${values[i]} votes`;
         circleContainer.appendChild(circle);
-    });
-}
+      });
+    }
 
-// Initialize chart first
-let chart;
-(async function init() {
-    try {
-        const payload = await fetchChartData();
-        if (!payload || payload.ok === false) throw new Error('No data or ok=false');
+    // Populate DataTable (destroy & recreate safely)
+    function populateTable(labels, values) {
+      const tbody = document.getElementById('tableBody');
+      tbody.innerHTML = '';
+      for (let i = 0; i < labels.length; i++) {
+        const tr = document.createElement('tr');
+        const td1 = document.createElement('td'); td1.textContent = labels[i];
+        const td2 = document.createElement('td'); td2.textContent = values[i];
+        tr.appendChild(td1); tr.appendChild(td2);
+        tbody.appendChild(tr);
+      }
 
-        const labels = payload.labels;
-        const values = payload.data;
-        const totalVotes = values.reduce((s,v) => s+v,0);
-        document.getElementById('totalVotes').textContent = totalVotes.toLocaleString();
+      // (re)initialize DataTable
+      if ($.fn.dataTable.isDataTable('#productsTable')) {
+        $('#productsTable').DataTable().destroy();
+      }
 
-        const colors = labels.map((_,i) => `hsl(${(i*52) % 360}, 78%, ${i%2 ? 60 : 52}%)`);
-        const borderColors = labels.map((_,i) => `hsl(${(i*52) % 360}, 78%, ${i%2 ? 40 : 38}%)`);
+      dataTable = $('#productsTable').DataTable({
+        pageLength: 10,
+        lengthMenu: [5, 10, 25, 50],
+        order: [[1, 'desc']], // order by votes desc
+        columnDefs: [{ targets: 1, className: 'dt-body-right' }]
+      });
+    }
 
-        const ctx = document.getElementById('chartCanvas').getContext('2d');
-        chart = new Chart(ctx, {
-            type: 'doughnut',
-            data: { labels, datasets:[{ data: values, backgroundColor: colors, borderColor: borderColors, borderWidth: 2, spacing: 4, borderRadius: 10 }] },
-            options: {
-                maintainAspectRatio: true,
-                aspectRatio: 1,
-                cutout: '38%',
-                plugins: {
-                    legend: { display:false },
-                    tooltip: { callbacks: { label: ctx => {
-                        const v = ctx.parsed || 0;
-                        const pct = totalVotes ? ((v/totalVotes)*100).toFixed(2) : '0.00';
-                        return `${ctx.label}: ${v} votes (${pct}%)`;
-                    }}},
-                    datalabels: {
-                        color: '#0b6623',
-                        font: { weight: '700', size: 14 },
-                        formatter: (value, ctx) => {
-                            const label = ctx.chart.data.labels[ctx.dataIndex] || '';
-                            const pct = totalVotes ? ((value/totalVotes)*100).toFixed(0) : '0';
-                            return label + '\n' + pct + '%';
-                        },
-                        textAlign: 'center', anchor:'center', align:'center', clamp:true
-                    }
+    // Initialize charts for the first time (empty)
+    function initEmptyCharts() {
+      const doughnutCtx = document.getElementById('doughnutChart').getContext('2d');
+      doughnutChart = new Chart(doughnutCtx, {
+        type: 'doughnut',
+        data: { labels: [], datasets: [{ data: [], backgroundColor: [], borderColor: [], borderWidth: 2, spacing: 4, borderRadius: 10 }] },
+        options: {
+          maintainAspectRatio: true,
+          aspectRatio: 1,
+          cutout: '38%',
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: ctx => {
+                  const v = ctx.parsed || 0;
+                  const total = doughnutChart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                  const pct = total ? ((v / total) * 100).toFixed(2) : '0.00';
+                  return `${ctx.label}: ${v} votes (${pct}%)`;
                 }
+              }
+            },
+            datalabels: {
+              color: '#ffffff',
+              font: { weight: '700', size: 12 },
+              formatter: (value, ctx) => {
+                const total = doughnutChart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                const pct = total ? ((value / total) * 100).toFixed(0) : '0';
+                const label = ctx.chart.data.labels[ctx.dataIndex] || '';
+                return label + '\n' + pct + '%';
+              },
+              textAlign: 'center', anchor: 'center', align: 'center', clamp: true
             }
-        });
+          }
+        }
+      });
 
-        renderCircles(payload);
+      const barCtx = document.getElementById('barChart').getContext('2d');
+      barChart = new Chart(barCtx, {
+        type: 'bar',
+        data: { labels: [], datasets: [{ label: 'Votes', data: [], backgroundColor: [], borderColor: [], borderWidth: 1 }] },
+        options: { scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } }
+      });
 
-        document.getElementById('downloadBtn').addEventListener('click', () => {
-            const a = document.createElement('a'); a.href = chart.toBase64Image(); a.download='votes_chart.png'; a.click();
-        });
-
-    } catch(err) {
-        console.error('Error initializing chart:', err);
+      const pieCtx = document.getElementById('pieChart').getContext('2d');
+      pieChart = new Chart(pieCtx, {
+        type: 'pie',
+        data: { labels: [], datasets: [{ data: [], backgroundColor: [] }] },
+        options: { plugins: { legend: { position: 'right' } } }
+      });
     }
-})();
 
-// Update chart and circles periodically
-async function updateData() {
-    try {
+    // Update all charts & table with payload
+    function applyPayload(payload) {
+      if (!payload || !Array.isArray(payload.labels) || !Array.isArray(payload.data)) return;
+
+      const labels = payload.labels;
+      const values = payload.data.map(Number);
+      const total = values.reduce((s, v) => s + v, 0);
+      document.getElementById('totalVotes').textContent = total.toLocaleString();
+
+      const colors = genColors(labels.length);
+      const borderColors = genBorderColors(labels.length);
+
+
+      // Doughnut
+      doughnutChart.data.labels = labels;
+      doughnutChart.data.datasets[0].data = values;
+      doughnutChart.data.datasets[0].backgroundColor = colors;
+      doughnutChart.data.datasets[0].borderColor = borderColors;
+      doughnutChart.update();
+
+      // Bar
+      barChart.data.labels = labels;
+      barChart.data.datasets[0].data = values;
+      barChart.data.datasets[0].backgroundColor = colors;
+      barChart.data.datasets[0].borderColor = borderColors;
+      barChart.update();
+
+      // Pie
+      pieChart.data.labels = labels;
+      pieChart.data.datasets[0].data = values;
+      pieChart.data.datasets[0].backgroundColor = colors;
+      pieChart.update();
+
+      // Circles and table
+      renderCircles(labels, values);
+      populateTable(labels, values);
+    }
+
+    // Download image from doughnut chart
+    function setupDownload() {
+      document.getElementById('downloadBtn').addEventListener('click', () => {
+        const a = document.createElement('a');
+        a.href = doughnutChart.toBase64Image();
+        a.download = 'votes_chart.png';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      });
+    }
+
+    // Init flow
+    (async function init() {
+      try {
+        initEmptyCharts();
+        setupDownload();
+
+        // first load
         const payload = await fetchChartData();
-        if (!payload || payload.ok === false) return;
+        applyPayload(payload);
 
-        const values = payload.data;
-        const totalVotes = values.reduce((s,v)=>s+v,0);
-        document.getElementById('totalVotes').textContent = totalVotes.toLocaleString();
+      } catch (err) {
+        console.error('Initialization error:', err);
+      }
+    })();
 
-        // Update chart
-        chart.data.labels = payload.labels;
-        chart.data.datasets[0].data = values;
-        chart.update();
-
-        // Update circles
-        renderCircles(payload);
-
-    } catch(err) {
+    // Periodic update
+    async function updateData() {
+      try {
+        const payload = await fetchChartData();
+        applyPayload(payload);
+      } catch (err) {
         console.error('Error updating data:', err);
+      }
     }
-}
 
-// Refresh every 5 seconds
-setInterval(updateData, 5000);
-</script>
+    // Refresh every 5 seconds
+    setInterval(updateData, 5000);
+  </script>
+
 </body>
+
 </html>

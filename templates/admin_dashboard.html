@@ -17,7 +17,7 @@
       <div class="text-2xl font-bold mb-8">LOGO</div>
       <nav class="space-y-2">
         <a class="block py-2 px-3 rounded bg-blue-600" href="#">Dashboard</a>
-        <a class="block py-2 px-3 rounded hover:bg-gray-800" href="/admin/chart_data">Voting Data</a>
+        <a class="block py-2 px-3 rounded hover:bg-gray-800" href="/dashboard">Voting Data</a>
         <a class="block py-2 px-3 rounded hover:bg-gray-800" href="/admin/candidates">Candidates</a>
         <a class="block py-2 px-3 rounded hover:bg-gray-800" href="/admin/users">Voter</a>
         <a class="block py-2 px-3 rounded hover:bg-gray-800" href="#">Setting</a>
@@ -68,7 +68,6 @@
         <div class="px-16">
            <img src="/static/candidates/{{ c.photo }}" alt="{{ c.name }}" class="w-72 h-72 object-cover rounded">
           <div class="text-2xl font-semibold">{{ c.name }}</div>
-          <div class="text-sm text-gray-600">Votes: {{ c.votes }}</div>
         </div>
         {% endfor %}
       </div>

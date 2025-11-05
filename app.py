@@ -4,6 +4,7 @@ import io
 import uuid
 import base64
 import hashlib
+import json
 import cv2
 import numpy as np
 from PIL import Image
@@ -45,7 +46,7 @@ def compute_embedding_from_array(img_array):
         return None
 
 # ------------------- NEW FACE_RECOGNITION HELPERS FOR VOTE -------------------
-SIM_THRESHOLD = 0.55  # cosine similarity threshold for face matching
+SIM_THRESHOLD = 0.55
 
 def compute_face_encoding(img_array):
     encs = face_recognition.face_encodings(img_array)

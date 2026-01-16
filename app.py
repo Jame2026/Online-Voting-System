@@ -492,21 +492,26 @@ def admin_users(request: Request):
         conn.close()
 
 @app.post("/admin/users/{user_id}/delete")
-def delete_user(user_id: int):
+def delete_user(request: Request, user_id: int, admin_id: int = Depends(require_admin)):
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     try:
-        # Delete user from database
+        # ✅ 1. Delete all votes linked to this user
+        cursor.execute("DELETE FROM votes WHERE user_id=%s", (user_id,))
+
+        # ✅ 2. Now delete the user safely
         cursor.execute("DELETE FROM users WHERE id=%s", (user_id,))
         conn.commit()
-        # Redirect back to the users page
+
+        # ✅ 3. Redirect back to admin user list
         return RedirectResponse("/admin/users", status_code=303)
+
+    except Exception as e:
+        print(f"Error deleting user: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
     finally:
         cursor.close()
         conn.close()
-
-
-
 
 
 
@@ -518,8 +523,10 @@ def require_admin(request: Request):
         sess = request.session
     except:
         sess = {}
-    if not sess.get("is_admin"):
-        raise HTTPException(status_code=403, detail="Admin required")
+    if not sess.get("admin_id"):
+        raise HTTPException(status_code=303, headers={"Location": "/admin/login"})
+    return sess["admin_id"]
+
 
 @app.get("/admin/chart_data")
 def admin_chart_data(request: Request):
